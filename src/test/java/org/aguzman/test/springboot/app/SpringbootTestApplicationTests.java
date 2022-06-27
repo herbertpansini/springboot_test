@@ -1,5 +1,7 @@
 package org.aguzman.test.springboot.app;
 
+import org.aguzman.test.springboot.app.models.Banco;
+import org.aguzman.test.springboot.app.models.Cuenta;
 import org.aguzman.test.springboot.app.repositories.BancoRepository;
 import org.aguzman.test.springboot.app.repositories.CuentaRepository;
 import org.aguzman.test.springboot.app.services.CuentaService;
@@ -46,5 +48,16 @@ class SpringbootTestApplicationTests {
 
 		assertEquals("900", saldoOrigen.toPlainString());
 		assertEquals("2100", saldoDestino.toPlainString());
+
+		int total = cuentaService.revisarTotalTransferencias(1L);
+		assertEquals(1, total);
+
+		verify(cuentaRepository, times(3)).findById(1L);
+		verify(cuentaRepository, times(3)).findById(2L);
+
+		verify(cuentaRepository, times(2)).update(any(Cuenta.class));
+
+		verify(bancoRepository, times(2)).findById(1L);
+		verify(bancoRepository).update(any(Banco.class));
 	}
 }
