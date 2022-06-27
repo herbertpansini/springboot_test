@@ -6,11 +6,12 @@ import org.aguzman.test.springboot.app.models.Cuenta;
 import org.aguzman.test.springboot.app.repositories.BancoRepository;
 import org.aguzman.test.springboot.app.repositories.CuentaRepository;
 import org.aguzman.test.springboot.app.services.CuentaService;
-import org.aguzman.test.springboot.app.services.impl.CuentaServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.math.BigDecimal;
 
@@ -21,15 +22,18 @@ import static org.aguzman.test.springboot.app.Datos.*;
 @SpringBootTest
 class SpringbootTestApplicationTests {
 
+	@MockBean
 	CuentaRepository cuentaRepository;
+	@MockBean
 	BancoRepository bancoRepository;
+	@Autowired
 	CuentaService cuentaService;
 
 	@BeforeEach
 	void setup() {
-		cuentaRepository = mock(CuentaRepository.class);
-		bancoRepository = mock(BancoRepository.class);
-		cuentaService = new CuentaServiceImpl(cuentaRepository, bancoRepository);
+//		cuentaRepository = mock(CuentaRepository.class);
+//		bancoRepository = mock(BancoRepository.class);
+//		cuentaService = new CuentaServiceImpl(cuentaRepository, bancoRepository);
 //		Datos.CUENTA_001.setSaldo(new BigDecimal("1000"));
 //		Datos.CUENTA_002.setSaldo(new BigDecimal("2000"));
 //		Datos.BANCO.setTotalTransferencias(0);
@@ -102,7 +106,7 @@ class SpringbootTestApplicationTests {
 		verify(bancoRepository, times(1)).findById(1L);
 		verify(bancoRepository, never()).update(any(Banco.class));
 
-		verify(cuentaRepository, times(6)).findById(anyLong());
+		verify(cuentaRepository, times(5)).findById(anyLong());
 		verify(bancoRepository, never()).findAll();
 	}
 
