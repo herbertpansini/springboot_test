@@ -21,12 +21,12 @@ public class CuentaServiceImpl implements CuentaService {
 
     @Override
     public Cuenta findById(Long id) {
-        return this.cuentaRepository.findById(id);
+        return this.cuentaRepository.findById(id).orElseThrow();
     }
 
     @Override
     public int revisarTotalTransferencias(Long bancoId) {
-        return this.bancoRepository.findById(bancoId).getTotalTransferencias();
+        return this.bancoRepository.findById(bancoId).orElseThrow().getTotalTransferencias();
     }
 
     @Override
@@ -38,15 +38,15 @@ public class CuentaServiceImpl implements CuentaService {
     public void transferir(Long numCuentaOrigen, Long numCuentaDestino, BigDecimal monto, Long bancoId) {
         Cuenta cuentaOrigen = this.findById(numCuentaOrigen);
         cuentaOrigen.debito(monto);
-        this.cuentaRepository.update(cuentaOrigen);
+        this.cuentaRepository.save(cuentaOrigen);
 
         Cuenta cuentaDestino = this.findById(numCuentaDestino);
         cuentaDestino.credito(monto);
-        this.cuentaRepository.update(cuentaDestino);
+        this.cuentaRepository.save(cuentaDestino);
 
-        Banco banco = this.bancoRepository.findById(bancoId);
+        Banco banco = this.bancoRepository.findById(bancoId).orElseThrow();
         int totalTransferencias = banco.getTotalTransferencias();
         banco.setTotalTransferencias(++totalTransferencias);
-        this.bancoRepository.update(banco);
+        this.bancoRepository.save(banco);
     }
 }
