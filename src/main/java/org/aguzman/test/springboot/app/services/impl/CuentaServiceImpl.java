@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,8 +21,19 @@ public class CuentaServiceImpl implements CuentaService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Cuenta> findAll() {
+        return cuentaRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Cuenta findById(Long id) {
         return this.cuentaRepository.findById(id).orElseThrow();
+    }
+
+    @Override
+    public Cuenta save(Cuenta cuenta) {
+        return this.cuentaRepository.save(cuenta);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.aguzman.test.springboot.app.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.aguzman.test.springboot.app.models.Cuenta;
 import org.aguzman.test.springboot.app.services.CuentaService;
 import org.aguzman.test.springboot.app.services.TransaccionDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +16,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import static org.aguzman.test.springboot.app.Datos.*;
@@ -74,5 +78,42 @@ class CuentaControllerTest {
                 .andExpect(jsonPath("$.date").value(LocalDate.now().toString()))
                 .andExpect(jsonPath("$.mensaje").value("Transferencia realizada con éxito!"))
                 .andExpect(jsonPath("$.transaccion.cuentaOrigenId").value(transaccionDto.getCuentaOrigenId()));
+    }
+
+    @Test
+    void testListar() throws Exception {
+        List<Cuenta> cuentas = Arrays.asList(crearCuenta001().orElseThrow(), crearCuenta002().orElseThrow());
+        when(cuentaService.findAll()).thenReturn(cuentas);
+
+        this.mvc.perform(get("/api/cuentas").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].persona").value("Andrés"))
+                .andExpect(jsonPath("$[1].persona").value("Jhon"))
+                .andExpect(jsonPath("$[0].saldo").value("1000"))
+                .andExpect(jsonPath("$[1].saldo").value("2000"))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(content().json(objectMapper.writeValueAsString(cuentas)));
+
+    }
+
+    @Test
+    void testGuardar() throws Exception {
+        Cuenta cuenta = new Cuenta(null, "Pepe", new BigDecimal("3000"));
+        when(cuentaService.save(any())).then(invocationOnMock -> {
+            Cuenta c = invocationOnMock.getArgument(0);
+            c.setId(3L);
+            return c;
+        });
+
+        this.mvc.perform(post("/api/cuentas").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cuenta)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(3)))
+                .andExpect(jsonPath("$.persona", is("Pepe")))
+                .andExpect(jsonPath("$.saldo", is(3000)));
+
+        verify(cuentaService).save(any());
     }
 }
