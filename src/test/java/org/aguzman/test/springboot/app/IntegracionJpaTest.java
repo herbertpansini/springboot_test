@@ -89,7 +89,7 @@ public class IntegracionJpaTest {
     @Test
     void testDelete() {
         Cuenta cuenta = cuentaRepository.findById(2L).orElseThrow();
-        assertEquals("Jhon", cuenta.getPersona());
+        assertEquals("John", cuenta.getPersona());
 
         cuentaRepository.delete(cuenta);
 
