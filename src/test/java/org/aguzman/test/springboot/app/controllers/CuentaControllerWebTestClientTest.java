@@ -3,9 +3,13 @@ package org.aguzman.test.springboot.app.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.aguzman.test.springboot.app.models.Cuenta;
 import org.aguzman.test.springboot.app.services.TransaccionDto;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -20,6 +24,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.Matchers.*;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CuentaControllerWebTestClientTest {
 
@@ -34,6 +39,7 @@ class CuentaControllerWebTestClientTest {
     }
 
     @Test
+    @Order(1)
     void testTransferir() throws JsonProcessingException {
         // Given
         TransaccionDto transaccionDto = new TransaccionDto();
@@ -55,6 +61,7 @@ class CuentaControllerWebTestClientTest {
                 .exchange()
         // Then
                 .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .consumeWith(respuesta -> {
                     try {
@@ -75,5 +82,33 @@ class CuentaControllerWebTestClientTest {
                 .jsonPath("$.date").isEqualTo(LocalDate.now().toString())
 //                .jsonPath(objectMapper.writeValueAsString(response))
         ;
+    }
+
+    @Test
+    @Order(2)
+    void testDetalle() throws JsonProcessingException {
+        Cuenta cuenta = new Cuenta(1L, "Andrés", new BigDecimal("900"));
+
+        webTestClient.get().uri("/api/cuentas/1").exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.persona").isEqualTo("Andrés")
+                .jsonPath("$.saldo").isEqualTo(900)
+                .json(objectMapper.writeValueAsString(cuenta));
+    }
+
+    @Test
+    @Order(3)
+    void testDetalle2() {
+        webTestClient.get().uri("/api/cuentas/2").exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Cuenta.class)
+                .consumeWith(response -> {
+                    Cuenta cuenta = response.getResponseBody();
+                    assertEquals("Jhon", cuenta.getPersona());
+                    assertEquals("2100.00", cuenta.getSaldo().toPlainString());
+                });
     }
 }
