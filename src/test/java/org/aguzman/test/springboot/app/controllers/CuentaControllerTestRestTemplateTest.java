@@ -1,5 +1,7 @@
 package org.aguzman.test.springboot.app.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aguzman.test.springboot.app.services.TransaccionDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.Matchers.*;
@@ -37,7 +42,7 @@ class CuentaControllerTestRestTemplateTest {
     }
 
     @Test
-    void testTransferir() {
+    void testTransferir() throws JsonProcessingException {
         TransaccionDto transaccionDto = new TransaccionDto();
         transaccionDto.setCuentaOrigenId(1L);
         transaccionDto.setCuentaDestinoId(2L);
@@ -52,6 +57,21 @@ class CuentaControllerTestRestTemplateTest {
         assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
         assertNotNull(json);
         assertTrue(json.contains("Transferencia realizada con éxito!"));
+        assertTrue(json.contains("{\"cuentaOrigenId\":1,\"cuentaDestinoId\":2,\"monto\":100,\"bancoId\":1}"));
+
+        JsonNode jsonNode = objectMapper.readTree(json);
+        assertEquals("Transferencia realizada con éxito!", jsonNode.path("mensaje").asText());
+        assertEquals(LocalDate.now().toString(), jsonNode.path("date").asText());
+        assertEquals("100", jsonNode.path("transaccion").path("monto").asText());
+        assertEquals(1L, jsonNode.path("transaccion").path("cuentaOrigenId").asLong());
+
+        Map<String, Object> response2 = new HashMap<>();
+        response2.put("date", LocalDate.now().toString());
+        response2.put("status", "OK");
+        response2.put("mensaje", "Transferencia realizada con éxito!");
+        response2.put("transaccion", transaccionDto);
+
+        assertEquals(objectMapper.writeValueAsString(response2), json);
     }
 
     private String crearUri(String uri) {
