@@ -6,8 +6,10 @@ import org.aguzman.test.springboot.app.models.Cuenta;
 import org.aguzman.test.springboot.app.repositories.BancoRepository;
 import org.aguzman.test.springboot.app.repositories.CuentaRepository;
 import org.aguzman.test.springboot.app.services.CuentaService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,7 +30,8 @@ public class CuentaServiceImpl implements CuentaService {
     @Override
     @Transactional(readOnly = true)
     public Cuenta findById(Long id) {
-        return this.cuentaRepository.findById(id).orElseThrow();
+        return this.cuentaRepository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cuenta %d not found", id)));
     }
 
     @Override

@@ -35,8 +35,8 @@ public class CuentaController {
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Cuenta detalle(@PathVariable Long id) {
-        return this.cuentaService.findById(id);
+    public ResponseEntity<?> detalle(@PathVariable Long id) {
+        return ResponseEntity.ok(this.cuentaService.findById(id));
     }
 
     @PostMapping
