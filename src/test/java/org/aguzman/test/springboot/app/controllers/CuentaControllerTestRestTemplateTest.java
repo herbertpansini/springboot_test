@@ -3,9 +3,11 @@ package org.aguzman.test.springboot.app.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.aguzman.test.springboot.app.models.Cuenta;
 import org.aguzman.test.springboot.app.services.TransaccionDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,7 @@ class CuentaControllerTestRestTemplateTest {
     }
 
     @Test
+    @Order(1)
     void testTransferir() throws JsonProcessingException {
         TransaccionDto transaccionDto = new TransaccionDto();
         transaccionDto.setCuentaOrigenId(1L);
@@ -72,6 +75,22 @@ class CuentaControllerTestRestTemplateTest {
         response2.put("transaccion", transaccionDto);
 
         assertEquals(objectMapper.writeValueAsString(response2), json);
+    }
+
+    @Test
+    @Order(2)
+    void testDetalle() {
+        ResponseEntity<Cuenta> respuesta = testRestTemplate.getForEntity(crearUri("/api/cuentas/1"), Cuenta.class);
+        Cuenta cuenta = respuesta.getBody();
+        assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+        assertEquals(MediaType.APPLICATION_JSON, respuesta.getHeaders().getContentType());
+
+        assertNotNull(cuenta);
+        assertEquals(1L, cuenta.getId());
+        assertEquals("Andrés", cuenta.getPersona());
+        assertEquals("900.00", cuenta.getSaldo().toPlainString());
+        assertEquals(new Cuenta(1L, "Andrés", new BigDecimal("900.00")), cuenta);
+
     }
 
     private String crearUri(String uri) {
