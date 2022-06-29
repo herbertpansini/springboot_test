@@ -94,6 +94,7 @@ class CuentaControllerTestRestTemplateTest {
     }
 
     @Test
+    @Order(3)
     void testListar() throws JsonProcessingException {
         ResponseEntity<Cuenta[]> respuesta = testRestTemplate.getForEntity(crearUri("/api/cuentas"), Cuenta[].class);
         List<Cuenta> cuentas = Arrays.asList(respuesta.getBody());
@@ -120,6 +121,20 @@ class CuentaControllerTestRestTemplateTest {
         assertEquals(2L, jsonNode.get(1).path("id").asLong());
         assertEquals("John", jsonNode.get(1).path("persona").asText());
         assertEquals("2100.0", jsonNode.get(1).path("saldo").asText());
+    }
+
+    @Test
+    @Order(4)
+    void testGuardar() {
+        Cuenta cuenta = new Cuenta(null, "Pepa", new BigDecimal("3000"));
+
+        ResponseEntity<Cuenta> respuesta = testRestTemplate.postForEntity(crearUri("/api/cuentas"), cuenta, Cuenta.class);
+        Cuenta cuentaCreada = respuesta.getBody();
+
+        assertNotNull(cuentaCreada);
+        assertEquals(3L, cuentaCreada.getId());
+        assertEquals("Pepa", cuentaCreada.getPersona());
+        assertEquals("3000", cuentaCreada.getSaldo().toPlainString());
     }
 
     private String crearUri(String uri) {
