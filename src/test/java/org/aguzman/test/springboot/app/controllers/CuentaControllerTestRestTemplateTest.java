@@ -20,11 +20,12 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.hamcrest.Matchers.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -90,7 +91,35 @@ class CuentaControllerTestRestTemplateTest {
         assertEquals("Andrés", cuenta.getPersona());
         assertEquals("900.00", cuenta.getSaldo().toPlainString());
         assertEquals(new Cuenta(1L, "Andrés", new BigDecimal("900.00")), cuenta);
+    }
 
+    @Test
+    void testListar() throws JsonProcessingException {
+        ResponseEntity<Cuenta[]> respuesta = testRestTemplate.getForEntity(crearUri("/api/cuentas"), Cuenta[].class);
+        List<Cuenta> cuentas = Arrays.asList(respuesta.getBody());
+
+        assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+        assertEquals(MediaType.APPLICATION_JSON, respuesta.getHeaders().getContentType());
+
+        assertFalse(cuentas.isEmpty());
+        assertEquals(2, cuentas.size());
+
+        assertEquals(1L, cuentas.get(0).getId());
+        assertEquals("Andrés", cuentas.get(0).getPersona());
+        assertEquals("900.00", cuentas.get(0).getSaldo().toPlainString());
+
+        assertEquals(2L, cuentas.get(1).getId());
+        assertEquals("John", cuentas.get(1).getPersona());
+        assertEquals("2100.00", cuentas.get(1).getSaldo().toPlainString());
+
+        JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(cuentas));
+        assertEquals(1L, jsonNode.get(0).path("id").asLong());
+        assertEquals("Andrés", jsonNode.get(0).path("persona").asText());
+        assertEquals("900.0", jsonNode.get(0).path("saldo").asText());
+
+        assertEquals(2L, jsonNode.get(1).path("id").asLong());
+        assertEquals("John", jsonNode.get(1).path("persona").asText());
+        assertEquals("2100.0", jsonNode.get(1).path("saldo").asText());
     }
 
     private String crearUri(String uri) {
