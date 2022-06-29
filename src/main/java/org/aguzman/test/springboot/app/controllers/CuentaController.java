@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/cuentas")
@@ -36,7 +37,11 @@ public class CuentaController {
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> detalle(@PathVariable Long id) {
-        return ResponseEntity.ok(this.cuentaService.findById(id));
+        try {
+            return ResponseEntity.ok(this.cuentaService.findById(id));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping

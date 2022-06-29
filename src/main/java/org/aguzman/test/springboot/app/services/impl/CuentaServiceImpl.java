@@ -30,8 +30,7 @@ public class CuentaServiceImpl implements CuentaService {
     @Override
     @Transactional(readOnly = true)
     public Cuenta findById(Long id) {
-        return this.cuentaRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Cuenta %d not found", id)));
+        return this.cuentaRepository.findById(id).orElseThrow();
     }
 
     @Override

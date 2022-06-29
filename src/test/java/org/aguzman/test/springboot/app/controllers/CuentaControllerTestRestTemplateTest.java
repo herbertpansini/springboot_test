@@ -165,7 +165,7 @@ class CuentaControllerTestRestTemplateTest {
 
         ResponseEntity<Cuenta> respuestaDetalle = testRestTemplate.getForEntity(crearUri("/api/cuentas/3"), Cuenta.class);
         assertEquals(HttpStatus.NOT_FOUND, respuestaDetalle.getStatusCode());
-        //assertFalse(respuestaDetalle.hasBody());
+        assertFalse(respuestaDetalle.hasBody());
     }
 
     private String crearUri(String uri) {
